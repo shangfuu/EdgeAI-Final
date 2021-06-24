@@ -209,7 +209,9 @@ def test_img(filename, model, db_name=cfg.DB_PATH):
                         people_name = name
             
             # draw on detect img
-            cv2.rectangle(img_detect, box[:2], box[2:], (255,0,0), 3)
+            # cv2.rectangle(img_detect, box[:2], box[2:], (255,0,0), 3)
+            # stupid colab
+            cv2.rectangle(img_detect, (box[0], box[1]), (box[2], box[3]), (255,0,0), 3)
             cv2.putText(img_detect, "verified face: " + people_name, (15, 30), cv2.FONT_HERSHEY_COMPLEX, 0.9, (255,0,0), 1)
     
     print("-" * 20)
