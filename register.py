@@ -18,8 +18,6 @@ import config as cfg
 
 
 ROOT = "./register"
-model_path = cfg.MODEL_PATH
-pkl_path = cfg.DB_PATH
 
 # Device Check
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -31,6 +29,7 @@ def parse_arg():
     parser.add_argument('-m', '--model', type=str, help='-m mine/tune/pretrain', default="mine", required=True)
     parser.add_argument('--video', dest='video_name', nargs='?', default="")
     parser.add_argument('--image', dest='img_name', nargs='?', default="")
+    parser.add_argument('--register', dest='reg', nargs='?', const=True , default=False)
 
     args = parser.parse_args()
     return args, parser
@@ -45,7 +44,7 @@ def video_writer(vc):
 
     return writer
 
-def inference(filename, model, model_path=model_path):
+def inference(filename, model, db_name=cfg.DB_PATH):
     
     # process on single frame
     tfms = transforms.Compose([transforms.Resize((cfg.IMG_SIZE, cfg.IMG_SIZE)), transforms.ToTensor()])
@@ -57,7 +56,7 @@ def inference(filename, model, model_path=model_path):
     )
 
     # Load Registered encoding Dict
-    encoding_dict = load_pickle()[0]
+    encoding_dict = load_pickle(file_path=db_name)[0]
 
     print("filenam: ", filename)
 
@@ -148,9 +147,9 @@ def inference(filename, model, model_path=model_path):
     vc.release()
     writer.release()
 
-def test_img(filename, model):
+def test_img(filename, model, db_name=cfg.DB_PATH):
     # load register DB
-    encoding_dict = load_pickle()[0]
+    encoding_dict = load_pickle(file_path=db_name)[0]
 
     # Create MTCNN
     mtcnn = MTCNN(
@@ -207,14 +206,13 @@ def test_img(filename, model):
             
             # draw on detect img
             cv2.rectangle(img_detect, box[:2], box[2:], (255,0,0), 3)
-            cv2.putText(img_detect, "verified face: " + people_name, (15, 30), cv2.FONT_HERSHEY_COMPLEX, 0.9, (0,255,0), 1)
+            cv2.putText(img_detect, "verified face: " + people_name, (15, 30), cv2.FONT_HERSHEY_COMPLEX, 0.9, (255,0,0), 1)
     
     print("-" * 20)
     print(people_name)
     cv2.imwrite("result.jpg", img_detect)
     
-    
-def load_pickle(file_path=pkl_path):
+def load_pickle(file_path=cfg.DB_PATH):
     encoding_dicts = []
 
     try:
@@ -230,11 +228,11 @@ def load_pickle(file_path=pkl_path):
     
     return encoding_dicts    
 
-def save_pickle(obj, file_path=pkl_path):
+def save_pickle(obj, file_path=cfg.DB_PATH):
     with open(file_path, "wb") as file:
         pickle.dump(obj, file)
 
-def register(model):
+def register(model, output= cfg.DB_PATH):
     
     encoding_dict = dict()
     print("-"*20)
@@ -270,22 +268,29 @@ def register(model):
             
             encoding_dict[label] = embeds
 
-    save_pickle(encoding_dict)
+    save_pickle(encoding_dict, file_path=output)
+
 
 if __name__ == "__main__":
     
     args, parser = parse_arg()
-
-    if model_path:
+    db_names = ["./register/mine-register.pkl","./register/tune-register.pkl", "./register/pre-register.pkl"]
+    db_name = ""
+    if os.path.exists(cfg.MODEL_PATH):
 
         # config witch model used
         if args.model == 'mine':
             # Load model
             model = FRNet(pretrained=True, data="WebFace")
-            model.load_state_dict(torch.load(model_path))
+            model.load_state_dict(torch.load(cfg.MODEL_PATH))
             
             model.to(device)
             model.eval()
+            if args.reg:
+                register(model, output=db_names[0])
+
+            db_name = db_names[0]
+
         elif args.model == 'tune':
             model = InceptionResnetV1(
                 classify=True,
@@ -297,22 +302,27 @@ if __name__ == "__main__":
             model.load_state_dict(torch.load("./models/lfw_tune.pth"))
             model.to(device)
             model.eval()
+            if args.reg:
+                register(model, output=db_names[1])
+            db_name = db_names[1]
         else:
             # others pretrained
             model = InceptionResnetV1(pretrained='vggface2').eval().to(device)
+            if args.reg:
+                register(model, output=db_names[2])
+            db_name = db_names[2]
 
         # summary(model)
-        register(model)
         
         if args.video_name:
             filename = os.path.join("./Data/Videos/", args.video_name)
-            inference(filename=filename, model=model)
+            inference(filename=filename, model=model, db_name=db_name)
         elif args.img_name:
             filename = os.path.join("./Data/Images/", args.img_name)
-            test_img(filename=filename, model=model)
+            test_img(filename=filename, model=model, db_name=db_name)
         else:
             print("only register")
 
     else:
-        print(f"Pretrained Model {model_path} not found")
+        print(f"Pretrained Model {cfg.MODEL_PATH} not found")
 

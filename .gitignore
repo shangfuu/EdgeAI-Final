@@ -7,7 +7,7 @@ Data/Videos/*
 !.gitkeep
 
 register/*
-!register/register.pkl
+!register/*.pkl
 
 CASIA-WebFace
 FACE
@@ -18,3 +18,5 @@ FACE
 run/
 .vscode/
 __pycache__/
+
+*.pth
