@@ -2,25 +2,25 @@
 
 ## 想要自行註冊人臉
 如果要自己註冊人臉資料庫的話，需要在 register 資料夾內放置想要註冊的人臉，並且需要使用資料夾包裝，作為名稱。
-"""
+```
 |__ register/
         |__ Name1
               |__ name.jpg
               |__ name2.jpg
         |__ Name2
-"""
+```
 指令:
 <code>python register.py -m pre --image musk.jpg --register</code>
 
 ## 測試
 想要測試的文件請放在下列資料夾內：
-"""
+```
 |__ Data
       |__ Images/
             |__ test.jpg
       |__ Videos/
             |__ test.mp4
-"""
+```
 
 - 測試圖片:
   - <code>python register.py -m pre --image test.jpg</code>
