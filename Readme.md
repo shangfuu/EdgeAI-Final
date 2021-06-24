@@ -34,4 +34,5 @@
 
 ## 訓練
 訓練的部分，我懶得寫 argparse，所以你想要救自己去翻一下 train.py 和 config.py。
+
 <code>python train.py</code>
