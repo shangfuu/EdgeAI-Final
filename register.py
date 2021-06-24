@@ -161,10 +161,10 @@ def test_img(filename, model, db_name=cfg.DB_PATH):
     im = cv2.imread(filename)
     
     print(filename)
-    if not im:
+    if im is None:
         print("no such image in Data/Image Folder")
         return
-        
+
     print(im.shape)
     # face = mtcnn(im)
     # cur_embed = model(face.to(device))
