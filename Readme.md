@@ -1,5 +1,13 @@
 # Edge AI Final
 
+## 使用
+使用之前，先去載 model 的 state_dict，目前放在雲端。\
+
+https://drive.google.com/drive/folders/1KTKajxL9nqU8gu_f31Uha-3PGXQqNsw_?usp=sharing
+
+把 .pkl 檔案放到 models/ 資料夾內。
+
+
 ## 想要自行註冊人臉
 如果要自己註冊人臉資料庫的話，需要在 register 資料夾內放置想要註冊的人臉，並且需要使用資料夾包裝，作為名稱。
 ```
