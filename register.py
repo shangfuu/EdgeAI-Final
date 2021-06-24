@@ -161,6 +161,10 @@ def test_img(filename, model, db_name=cfg.DB_PATH):
     im = cv2.imread(filename)
     
     print(filename)
+    if not im:
+        print("no such image in Data/Image Folder")
+        return
+        
     print(im.shape)
     # face = mtcnn(im)
     # cur_embed = model(face.to(device))
@@ -274,7 +278,7 @@ def register(model, output= cfg.DB_PATH):
 if __name__ == "__main__":
     
     args, parser = parse_arg()
-    db_names = ["./register/mine-register.pkl","./register/tune-register.pkl", "./register/pre-register.pkl"]
+    db_names = ["./register/mine-register.pkl","./register/tune-register.pkl", "./register/pre-register"]
     db_name = ""
     if os.path.exists(cfg.MODEL_PATH):
 
